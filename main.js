@@ -1,8 +1,16 @@
+// Ш-Г-В вариант
+// let boxPresets = {
+//     MICRO: [175, 145, 145],
+//     MINI: [330, 200, 175],
+//     MIDI: [380, 304, 285],
+//     MAXI: [630, 320, 340]
+// };
+
 let boxPresets = {
     MICRO: [175, 145, 145],
-    MINI: [330, 200, 175],
-    MIDI: [380, 304, 285],
-    MAXI: [630, 320, 340]
+    MINI: [330, 175, 200],
+    MIDI: [380, 285, 304],
+    MAXI: [630, 340, 320]
 };
 
 let dropdown = document.getElementById("box-presets");
@@ -57,7 +65,7 @@ function onCountClick() {
 
 function setBoxPreset(name) {
     let preset = boxPresets[name];
-    ["box-x", "box-z", "box-y"].forEach((id, i) => {
+    ["box-x", "box-y", "box-z"].forEach((id, i) => {
         let el = document.getElementById(id);
         el.value = preset[i];
     });
@@ -74,7 +82,11 @@ function fillTable(descr) {
         </tr>`
         tbody.insertAdjacentHTML('beforeend', tableRow);
     });
-    tbody.insertAdjacentHTML('beforeend', `<tr class="table-secondary">
+    let resultColor = "table-primary";
+    if (mainBox.content.length == 0) {
+        resultColor = "table-danger";
+    }
+    tbody.insertAdjacentHTML('beforeend', `<tr class="${resultColor}">
         <td colspan="2">Итого:</td>
         <td><b>${mainBox.content.length}</b></td>
     </tr>`);

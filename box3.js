@@ -63,8 +63,8 @@ class Box3 {
             }
         }
         this.descr.push([
-            `${rotatedItemSize[0]} x ${rotatedItemSize[2]} x ${rotatedItemSize[1]}`,
-            `${bestRows[0]} x ${bestRows[2]} x ${bestRows[1]}`,
+            `${rotatedItemSize[0]} x ${rotatedItemSize[1]} x ${rotatedItemSize[2]}`,
+            `${bestRows[0]} x ${bestRows[1]} x ${bestRows[2]}`,
             this.content.length
         ]);
 
@@ -107,7 +107,6 @@ class Box3 {
             addItem.pos[2] += bestAddBox.pos[2];
             this.content.push(addItem);
         });
-        // this.descr += bestRows[0] + " * " + bestRows[1] + " * " + bestRows[2];
         if (maxAddCount > 0) {
             this.descr = this.descr.concat(bestAddBox.descr);
         }
