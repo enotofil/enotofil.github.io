@@ -18,13 +18,18 @@ for (var preset in boxPresets) {
     let size = boxPresets[preset];
     let presetStr = '<a class="dropdown-item" href="#" onclick="setBoxPreset(\'' +
         preset + '\')">' + preset + ": " +
-        size[0] + ' x ' + size[1] + ' x ' + size[2] + '</a';
+        size[0] + ' x ' + size[1] + ' x ' + size[2] + '</a>';
     dropdown.insertAdjacentHTML('beforeend', presetStr);
 };
+dropdown.insertAdjacentHTML('beforeend', `
+    <a class="dropdown-item" href="#" onclick="countAllPresets()">
+        Считать все
+    </a>`);
 
 let mainBox = null;
 
 let canvas = document.getElementById('render_area');
+let tbody = document.getElementById("item-table");
 
 window.addEventListener('resize', resizeCanvas, false);
 resizeCanvas();
@@ -38,6 +43,10 @@ function resizeCanvas() {
 }
 
 function onCountClick() {
+    tbody.innerHTML = "";
+    mainBox = null;
+    resizeCanvas();
+
     let boxInputs = ["box-x", "box-y", "box-z"];
     let boxSize = [0, 0, 0];
     let itemInputs = ["item-x", "item-y", "item-z"];
@@ -69,11 +78,44 @@ function setBoxPreset(name) {
         let el = document.getElementById(id);
         el.value = preset[i];
     });
+    onCountClick();
 }
 
-function fillTable(descr) {
-    let tbody = document.getElementById("item-table");
+function countAllPresets() {
     tbody.innerHTML = "";
+    mainBox = null;
+    resizeCanvas();
+
+    let itemInputs = ["item-x", "item-y", "item-z"];
+    let itemSize = [0, 0, 0];
+    itemInputs.forEach((id, i) => {
+        itemSize[i] = document.getElementById(id).valueAsNumber;
+    });
+
+    if (itemSize.includes(NaN)) {
+        console.log("Bad input!");
+        return;
+    }
+
+    for (var preset in boxPresets) {
+        let size = boxPresets[preset];
+        mainBox = new Box3(size);
+        mainBox.fillWith(itemSize);
+        tbody.insertAdjacentHTML('beforeend', `
+                <tr>
+                    <td colspan="3"><b>` +
+            preset + ': ' + size[0] + ' x ' + size[1] + ' x ' + size[2] +
+            `</b></td>
+                </tr>
+        `);
+        fillTable(mainBox.descr, false);
+    }
+    mainBox = null;
+    resizeCanvas();
+}
+
+function fillTable(descr, clear = true) {
+    if (clear) { tbody.innerHTML = ""; }
     descr.forEach(row => {
         let tableRow = `<tr>
             <td>${row[0]}</td>
