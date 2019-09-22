@@ -10,64 +10,18 @@
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
     integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 
-  <title>Upacker-3D.js</title>
+  <title>Главное меню</title>
 </head>
 
 <body>
-  <div class="container" style="margin-top:8px" id="main-container">
-    <div class="row">
-      <div class="col-12 col-md-6">
-        <p><b>Контейнер </b><i>(ширина-высота-глубина)</i></p>
-        <div class="input-group mb-2">
-          <input type="number" class="form-control" min="1" step="1" value="330" id="box-x">
-          <input type="number" class="form-control" min="1" step="1" value="200" id="box-y">
-          <input type="number" class="form-control" min="1" step="1" value="175" id="box-z">
-        </div>
-        <div class="dropdown">
-          <button type="button" class="btn dropdown-toggle btn-outline-secondary btn-block" data-toggle="dropdown">
-            Стандартные
-          </button>
-          <div class="dropdown-menu" style="font-family: monospace" id="box-presets"></div>
-        </div>
-        <hr class="d-flex">
-      </div>
-
-      <div class="col-12 col-md-6">
-        <p><b>Предмет </b><i>(ширина-высота-глубина)</i></p>
-        <div class="input-group mb-2">
-          <input type="number" class="form-control" min="1" step="1" value="120" id="item-x">
-          <input type="number" class="form-control" min="1" step="1" value="35" id="item-y">
-          <input type="number" class="form-control" min="1" step="1" value="35" id="item-z">
-        </div>
-        <button type="button" class="btn btn-primary btn-block" onclick="onCountClick()">
-          Считать
-        </button>
-        <hr class="d-flex">
-      </div>
-
-      <div class="col-12">
-        <table class="table table-sm table-bordered">
-          <thead align="center">
-            <tr class="table-secondary">
-              <th scope="col">Положение</th>
-              <th scope="col">Ряды</th>
-              <th scope="col">Количество</th>
-            </tr>
-          </thead>
-          <tbody align="center" id="item-table"></tbody>
-        </table>
-      </div>
-
-      <div class="col-6" id="canvas_col">
-        <canvas id="render_area"></canvas>
-      </div>
-
+  <div class="container" style="margin-top:8px">
+    <div class="list-group">
+      <a href="upacker3d/index.html" class="list-group-item list-group-item-action">3D Упаковщик</a>
+      <a href="frames/index.html" class="list-group-item list-group-item-action">Рамки / профили</a>
     </div>
+
   </div>
 
-  <!-- Optional JavaScript -->
-  <script src="box3.js"></script>
-  <script src="main.js"></script>
   <!-- jQuery first, then Popper.js, then Bootstrap JS -->
   <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
     integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
