@@ -10,51 +10,103 @@
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
     integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 
-  <title>3D упаковщик</title>
+  <title>Коробки</title>
+  <link href="https://fonts.googleapis.com/css?family=PT+Mono&display=swap&subset=cyrillic" rel="stylesheet">
+  <style>
+    .monotext {
+      font-family: 'PT Mono', monospace;
+      font-size: 18px;
+    }
+  </style>
+
 </head>
 
 <body>
   <div class="container" style="margin-top:8px" id="main-container">
-    <div class="row">
-      <div class="col-12 col-md-6">
-        <p><b>Контейнер </b><i>(ширина-высота-глубина)</i></p>
-        <div class="input-group mb-2">
-          <input type="number" class="form-control" min="1" step="1" value="330" id="box-x">
-          <input type="number" class="form-control" min="1" step="1" value="200" id="box-y">
-          <input type="number" class="form-control" min="1" step="1" value="175" id="box-z">
-        </div>
-        <div class="dropdown">
-          <button type="button" class="btn dropdown-toggle btn-outline-secondary btn-block" data-toggle="dropdown">
-            Стандартные
-          </button>
-          <div class="dropdown-menu" style="font-family: monospace" id="box-presets"></div>
-        </div>
-        <hr class="d-flex">
+    <div class="row monotext">
+
+      <div class="col-12 col-md-3">
+        <p>Контейнер</p>
       </div>
 
-      <div class="col-12 col-md-6">
-        <p><b>Предмет </b><i>(ширина-высота-глубина)</i></p>
-        <div class="input-group mb-2">
-          <input type="number" class="form-control" min="1" step="1" value="120" id="item-x">
-          <input type="number" class="form-control" min="1" step="1" value="35" id="item-y">
-          <input type="number" class="form-control" min="1" step="1" value="35" id="item-z">
+      <div class="col-12 col-md-6 mb-1">
+        <div class="input-group">
+          <div class="input-group-prepend">
+            <span class="input-group-text">Ш</span>
+          </div>
+          <input type="number" class="form-control" min="1" step="1" value="120" id="box-x">
+          <div class="input-group-prepend">
+            <span class="input-group-text">В</span>
+          </div>
+          <input type="number" class="form-control" min="1" step="1" value="35" id="box-y">
+          <div class="input-group-prepend">
+            <span class="input-group-text">Г</span>
+          </div>
+          <input type="number" class="form-control" min="1" step="1" value="35" id="box-z">
         </div>
-        <button type="button" class="btn btn-primary btn-block" onclick="onCountClick()">
-          Считать
+      </div>
+
+      <div class="col-12 col-md-3">
+        <button type="button" class="btn btn-outline-secondary dropdown-toggle btn-block" data-toggle="dropdown">
+          Стандартные
         </button>
-        <hr class="d-flex">
+        <div class="dropdown-menu" id="box-presets"></div>
       </div>
 
       <div class="col-12">
+        <hr class="d-flex">
+      </div>
+
+      <div class="col-12 col-md-3">
+        <p>Предмет</p>
+      </div>
+
+      <div class="col-12 col-md-6 mb-1">
+        <div class="input-group">
+          <div class="input-group-prepend">
+            <span class="input-group-text">Ш</span>
+          </div>
+          <input type="number" class="form-control" min="1" step="1" value="120" id="item-x">
+          <div class="input-group-prepend">
+            <span class="input-group-text">В</span>
+          </div>
+          <input type="number" class="form-control" min="1" step="1" value="35" id="item-y">
+          <div class="input-group-prepend">
+            <span class="input-group-text">Г</span>
+          </div>
+          <input type="number" class="form-control" min="1" step="1" value="35" id="item-z">
+        </div>
+      </div>
+
+      <div class="col-12 col-md-3">
+        <div class="input-group">
+          <div class="input-group-prepend">
+            <span class="input-group-text">Количество</span>
+          </div>
+          <input type="number" class="form-control" min="1" step="1" value="10" id="item-count">
+        </div>
+      </div>
+
+      <div class="col-12">
+        <hr class="d-flex">
+      </div>
+
+      <div class="col-12 col-md-6 mb-2">
+        <button type="button" class="btn btn-outline-secondary btn-block" onclick="onCalcBoxSizeClick()">
+          Расчет размера контейнера под количество
+        </button>
+      </div>
+
+      <div class="col-12 col-md-6 mb-3">
+        <button type="button" class="btn btn-outline-secondary btn-block" onclick="onCalcItemCountClick()">
+          Расчет количества в указанном контейнере
+        </button>
+      </div>
+
+      <div class="col-12" style="font-size: 16px;">
         <table class="table table-sm table-bordered">
-          <thead align="center">
-            <tr class="table-secondary">
-              <th scope="col">Положение</th>
-              <th scope="col">Ряды</th>
-              <th scope="col">Количество</th>
-            </tr>
-          </thead>
-          <tbody align="center" id="item-table"></tbody>
+          <thead align="center" id="table-header"></thead>
+          <tbody align="center" id="table-body"></tbody>
         </table>
       </div>
 
@@ -66,8 +118,7 @@
   </div>
 
   <!-- Optional JavaScript -->
-  <script src="box3.js"></script>
-  <script src="main.js"></script>
+  <script src="index.js"></script>
   <!-- jQuery first, then Popper.js, then Bootstrap JS -->
   <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
     integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
