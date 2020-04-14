@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
+
+    <!-- Bootstrap -->
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+        integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+        crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+        integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+        integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+        crossorigin="anonymous"></script>
+
+    <title>3D Упаковщик</title>
+    <link href="https://fonts.googleapis.com/css?family=PT+Mono&display=swap&subset=cyrillic" rel="stylesheet">
+    <style>
+        .monotext {
+            font-family: 'PT Mono', monospace;
+            font-size: 18px;
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <div class="container monotext" style="margin-top:8px" id="main-container">
+
+        <nav>
+            <div class="nav nav-tabs" id="nav-tab" role="tablist">
+                <a class="nav-item nav-link active" id="nav-find-count-tab" data-toggle="tab" href="#nav-find-count"
+                    role="tab" aria-controls="nav-find-count" aria-selected="true">Упаковка</a>
+                <a class="nav-item nav-link" id="nav-find-box-tab" data-toggle="tab" href="#nav-find-box" role="tab"
+                    aria-controls="nav-find-box" aria-selected="false">Размер коробки</a>
+            </div>
+        </nav>
+
+        <div class="tab-content" style="margin-top:10px" id="nav-tabContent">
+
+            <!-- ========================================================================================== -->
+
+            <div class="tab-pane fade show active" id="nav-find-count" role="tabpanel"
+                aria-labelledby="nav-find-count-tab">
+
+                <div class="row">
+
+                    <div class="col-12 col-md-3">
+                        <p id="box-label">Коробка</p>
+                    </div>
+
+                    <div class="col-12 col-md-6 mb-1">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">Ш</span>
+                            </div>
+                            <input type="number" class="form-control" oninput="onBoxChange()" min="1" step="1"
+                                value="360" id="box-x">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">В</span>
+                            </div>
+                            <input type="number" class="form-control" oninput="onBoxChange()" min="1" step="1"
+                                value="245" id="box-y">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">Г</span>
+                            </div>
+                            <input type="number" class="form-control" oninput="onBoxChange()" min="1" step="1"
+                                value="280" id="box-z">
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-md-3">
+                        <button type="button" class="btn btn-outline-secondary dropdown-toggle btn-block"
+                            data-toggle="dropdown">
+                            Стандартные
+                        </button>
+                        <div class="dropdown-menu" id="box-presets"></div>
+                    </div>
+
+                    <div class="col-12">
+                        <hr class="d-flex">
+                    </div>
+
+                    <div class="col-12 col-md-3">
+                        <p>Предмет</p>
+                    </div>
+
+                    <div class="col-12 col-md-6 mb-1">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">Ш</span>
+                            </div>
+                            <input type="number" class="form-control" min="1" step="1" value="100" id="item2-x">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">В</span>
+                            </div>
+                            <input type="number" class="form-control" min="1" step="1" value="30" id="item2-y">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">Г</span>
+                            </div>
+                            <input type="number" class="form-control" min="1" step="1" value="60" id="item2-z">
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-md-3">
+                        <button type="button" class="btn btn-outline-secondary btn-block" onclick="onFindCountClick()">
+                            Упаковать
+                        </button>
+                    </div>
+
+                    <div class="col-12">
+                        <hr class="d-flex">
+                    </div>
+
+                    <div class="col-12" style="font-size: 16px;">
+                        <table class="table table-sm table-bordered">
+                            <thead align="center" id="table-header-count"></thead>
+                            <tbody align="center" id="table-body-count"></tbody>
+                        </table>
+                    </div>
+
+                    <div class="col-6">
+                        <canvas id="render-area-count"></canvas>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- ========================================================================================== -->
+
+            <div class="tab-pane fade" id="nav-find-box" role="tabpanel" aria-labelledby="nav-find-box-tab">
+
+                <div class="row">
+
+                    <div class="col-12 col-md-2">
+                        <p>Предмет</p>
+                    </div>
+
+                    <div class="col-12 col-md-6 mb-1">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">Ш</span>
+                            </div>
+                            <input type="number" class="form-control" min="1" step="1" value="100" id="item1-x">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">В</span>
+                            </div>
+                            <input type="number" class="form-control" min="1" step="1" value="30" id="item1-y">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">Г</span>
+                            </div>
+                            <input type="number" class="form-control" min="1" step="1" value="60" id="item1-z">
+                        </div>
+                    </div>
+
+                    <div class="col-6 col-md-2">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">Кол-во</span>
+                            </div>
+                            <input type="number" class="form-control" min="1" step="1" value="48" id="item-count">
+                        </div>
+                    </div>
+
+                    <div class="col-6 col-md-2 mb-2">
+                        <button type="button" class="btn btn-outline-secondary btn-block" onclick="onFindBoxClick()">
+                            Считать
+                        </button>
+                    </div>
+
+                    <div class="col-12">
+                        <hr class="d-flex">
+                    </div>
+
+                    <div class="col-12" style="font-size: 16px;">
+                        <table class="table table-sm table-bordered">
+                            <thead align="center" id="table-header-box"></thead>
+                            <tbody align="center" id="table-body-box"></tbody>
+                        </table>
+                    </div>
+
+                    <div class="col-6">
+                        <canvas id="render-area-box"></canvas>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- ========================================================================================== -->
+
+        </div>
+
+    </div>
+
+    <!-- Optional JavaScript -->
+    <script src="index.js"></script>
+
+</body>
+
+</html>
