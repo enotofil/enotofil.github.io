@@ -1,17 +1,19 @@
 "use strict";
 ;
 var Box3 = (function () {
-    function Box3(size, name) {
+    function Box3(size, pos, name) {
+        if (size === void 0) { size = new Vec3(); }
+        if (pos === void 0) { pos = new Vec3(); }
         if (name === void 0) { name = ''; }
         this.size = size;
+        this.pos = pos;
         this.name = name;
         this.content = [];
         this.descr = [];
-        this.pos = Vec3.zero;
     }
     Box3.createBoxForItems = function (itemSize, itemCount) {
         var minDimensionSum = Number.MAX_VALUE;
-        var bestFit = Vec3.zero;
+        var bestFit = new Vec3();
         for (var rowX = 1; rowX <= itemCount; rowX++) {
             for (var rowY = 1; rowY <= Math.ceil(itemCount / rowX); rowY++) {
                 var rowZ = Math.ceil(itemCount / rowX / rowY);
@@ -44,13 +46,48 @@ var Box3 = (function () {
         });
         return box;
     };
+    Box3.prototype.placeMaxItemCount = function (itemSize) {
+        this.fillWithItems(itemSize);
+        var _loop_1 = function () {
+            var filledSpace = new Vec3();
+            this_1.content.forEach(function (item) {
+                var itemMaxPoint = Vec3.add(item.pos, item.size);
+                if (itemMaxPoint.x > filledSpace.x)
+                    filledSpace.x = itemMaxPoint.x;
+                if (itemMaxPoint.y > filledSpace.y)
+                    filledSpace.y = itemMaxPoint.y;
+                if (itemMaxPoint.z > filledSpace.z)
+                    filledSpace.z = itemMaxPoint.z;
+            });
+            var remainX = new Box3(new Vec3(this_1.size.x - filledSpace.x, this_1.size.y, this_1.size.z), new Vec3(filledSpace.x, 0, 0));
+            var remainY = new Box3(new Vec3(this_1.size.x, this_1.size.y - filledSpace.y, this_1.size.z), new Vec3(0, filledSpace.y, 0));
+            var remainZ = new Box3(new Vec3(this_1.size.x, this_1.size.y, this_1.size.z - filledSpace.z), new Vec3(0, 0, filledSpace.z));
+            var maxAddCount = 0;
+            var bestAddBox = new Box3();
+            [remainX, remainY, remainZ].forEach(function (addBox) {
+                addBox.fillWithItems(itemSize);
+                if (maxAddCount < addBox.content.length) {
+                    bestAddBox = addBox;
+                    maxAddCount = addBox.content.length;
+                }
+            });
+            if (maxAddCount == 0)
+                return "break";
+            this_1.content = this_1.content.concat(bestAddBox.content);
+            this_1.descr = this_1.descr.concat(bestAddBox.descr);
+        };
+        var this_1 = this;
+        while (true) {
+            var state_1 = _loop_1();
+            if (state_1 === "break")
+                break;
+        }
+    };
     Box3.prototype.fillWithItems = function (itemSize) {
         var _this = this;
-        var bestRotation = Vec3.zero;
+        var bestRotation = new Vec3();
         var maxCount = 0;
-        var bestRows = Vec3.zero;
-        var maxAddCount = 0;
-        var bestAddBox = new Box3(Vec3.zero);
+        var bestRows = new Vec3();
         itemSize.rotations.forEach(function (r) {
             var rows = new Vec3(Math.floor(_this.size.x / r.x), Math.floor(_this.size.y / r.y), Math.floor(_this.size.z / r.z));
             var count = rows.vol;
@@ -68,7 +105,7 @@ var Box3 = (function () {
             for (var rowY = 0; rowY < bestRows.y; rowY++) {
                 for (var rowZ = 0; rowZ < bestRows.z; rowZ++) {
                     var item = new Item3(bestRotation);
-                    item.pos = new Vec3(rowX * bestRotation.x, rowY * bestRotation.y, rowZ * bestRotation.z);
+                    item.pos = new Vec3(this.pos.x + rowX * bestRotation.x, this.pos.y + rowY * bestRotation.y, this.pos.z + rowZ * bestRotation.z);
                     this.content.push(item);
                 }
             }
@@ -78,26 +115,6 @@ var Box3 = (function () {
             rows: bestRows,
             count: this.content.length,
         });
-        var remainX = new Box3(new Vec3(this.size.x - bestRotation.x * bestRows.x, this.size.y, this.size.z));
-        remainX.pos = new Vec3(bestRotation.x * bestRows.x, 0, 0);
-        var remainY = new Box3(new Vec3(this.size.x, this.size.y - bestRotation.y * bestRows.y, this.size.z));
-        remainY.pos = new Vec3(0, bestRotation.y * bestRows.y, 0);
-        var remainZ = new Box3(new Vec3(this.size.x, this.size.y, this.size.z - bestRotation.z * bestRows.z));
-        remainZ.pos = new Vec3(0, 0, bestRotation.z * bestRows.z);
-        [remainX, remainY, remainZ].forEach(function (addBox) {
-            addBox.fillWithItems(itemSize);
-            if (maxAddCount < addBox.content.length) {
-                bestAddBox = addBox;
-                maxAddCount = addBox.content.length;
-            }
-        });
-        bestAddBox.content.forEach(function (addItem) {
-            addItem.pos = Vec3.add(addItem.pos, bestAddBox.pos);
-            _this.content.push(addItem);
-        });
-        if (maxAddCount > 0) {
-            this.descr = this.descr.concat(bestAddBox.descr);
-        }
     };
     Box3.prototype.draw = function (canvas) {
         var w = canvas.width;
@@ -122,6 +139,12 @@ var Box3 = (function () {
             'rgb(255, 255, 255)'
         ];
         this.content.forEach(function (item) {
+            if (item.isFlat()) {
+                ctx.strokeStyle = 'rgba(0,0,0,0.2)';
+            }
+            else {
+                ctx.strokeStyle = 'black';
+            }
             item.drawPaths.forEach(function (path, i) {
                 path.closePath();
                 ctx.fillStyle = sideColors[i];
@@ -204,7 +227,7 @@ function onFindCountClick(wipeTable) {
         return;
     }
     var mainBox = new Box3(boxSize);
-    mainBox.fillWithItems(itemSize);
+    mainBox.placeMaxItemCount(itemSize);
     tableHeader.innerHTML =
         "<tr class=\"table-secondary\">\n            <th scope=\"col\">\u043F\u0440\u0435\u0434\u043C\u0435\u0442</th>\n            <th scope=\"col\">\u0440\u044F\u0434\u044B</th>\n            <th scope=\"col\">\u043A\u043E\u043B.</th>\n        </tr>";
     if (wipeTable)
@@ -251,10 +274,16 @@ function onBoxChange() {
     boxLabel.innerHTML = "Коробка";
 }
 var Item3 = (function () {
-    function Item3(size) {
+    function Item3(size, pos) {
+        if (pos === void 0) { pos = new Vec3(); }
         this.size = size;
-        this.pos = Vec3.zero;
+        this.pos = pos;
     }
+    Item3.prototype.isFlat = function () {
+        if (this.size.x < 2 || this.size.y < 2 || this.size.z < 2)
+            return true;
+        return false;
+    };
     Object.defineProperty(Item3.prototype, "drawPaths", {
         get: function () {
             var x = this.pos.x;
@@ -329,6 +358,9 @@ function resizeAllCanvas() {
 }
 var Vec3 = (function () {
     function Vec3(x, y, z) {
+        if (x === void 0) { x = 0; }
+        if (y === void 0) { y = 0; }
+        if (z === void 0) { z = 0; }
         this.x = x;
         this.y = y;
         this.z = z;
@@ -372,6 +404,5 @@ var Vec3 = (function () {
         enumerable: true,
         configurable: true
     });
-    Vec3.zero = new Vec3(0, 0, 0);
     return Vec3;
 }());
