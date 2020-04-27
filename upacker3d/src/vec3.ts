@@ -1,11 +1,9 @@
 class Vec3 {
     constructor(
-        public x: number,
-        public y: number,
-        public z: number
+        public x: number = 0,
+        public y: number = 0,
+        public z: number = 0
     ) { }
-
-    static zero = new Vec3(0, 0, 0);
 
     static add(v1: Vec3, v2: Vec3): Vec3 {
         return new Vec3(
@@ -33,10 +31,12 @@ class Vec3 {
         return this.x + " x " + this.y + " x " + this.z;
     }
 
+    // Объем
     get vol() {
         return this.x * this.y * this.z;
     }
 
+    // Все возможные положения в пространстве
     get rotations() {
         return [
             new Vec3(this.x, this.y, this.z),

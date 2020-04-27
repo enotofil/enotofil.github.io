@@ -27,7 +27,7 @@ function onFindCountClick(wipeTable: boolean = true) {
     }
 
     let mainBox = new Box3(boxSize);
-    mainBox.fillWithItems(itemSize);
+    mainBox.placeMaxItemCount(itemSize);
 
     tableHeader.innerHTML =
         `<tr class="table-secondary">
@@ -58,6 +58,7 @@ function onFindCountClick(wipeTable: boolean = true) {
             <td colspan="2">Итого предметов в коробке ${mainBox.size.toString()}:</td>
             <td><b>${mainBox.content.length}</b></td>
         </tr>`);
+
 
         if (wipeTable) mainBox.draw(canvas);
         else canvas.height = 1;

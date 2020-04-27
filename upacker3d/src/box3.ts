@@ -11,19 +11,21 @@ interface TableEntry {
 class Box3 {
     content: Item3[]; // размещенные и ориентированные предметы
     descr: TableEntry[];
-    pos: Vec3; // для помежуточных вычислений, в итоге Vec3.zero 
 
-    constructor(public size: Vec3, public name: string = '') {
+    constructor(
+        public size: Vec3 = new Vec3(),
+        public pos: Vec3 = new Vec3(),
+        public name: string = '') {
+
         this.content = [];
         this.descr = [];
-        this.pos = Vec3.zero;
     }
 
     // Расчет оптимального (мин. сумма сторон) контейнера для заданного кол-ва
     static createBoxForItems(itemSize: Vec3, itemCount: number): Box3 {
         let minDimensionSum = Number.MAX_VALUE;
 
-        let bestFit = Vec3.zero; // комбинации рядов Ш/В/Г с меньшей суммой сторон 
+        let bestFit = new Vec3(); // комбинации рядов Ш/В/Г с меньшей суммой сторон 
 
         // находим bestFit, перебирая все возможные варианты
         for (let rowX = 1; rowX <= itemCount; rowX++) {
@@ -67,12 +69,61 @@ class Box3 {
     }
 
     // Размещение максимального количества заданных предметов ----------------
+    placeMaxItemCount(itemSize: Vec3) {
+        this.fillWithItems(itemSize);
+
+        // размещение в оставшемся свободном объеме
+        // повторяем, пока добавляется хоть 1 предмет
+        while (true) {
+
+            // определение заполненного объема
+            let filledSpace = new Vec3();
+            this.content.forEach(function(item) {
+                let itemMaxPoint = Vec3.add(item.pos, item.size)
+                if (itemMaxPoint.x > filledSpace.x) filledSpace.x = itemMaxPoint.x;
+                if (itemMaxPoint.y > filledSpace.y) filledSpace.y = itemMaxPoint.y;
+                if (itemMaxPoint.z > filledSpace.z) filledSpace.z = itemMaxPoint.z;
+            });
+
+            // oпределяем незаполненные области по 3м осям
+            let remainX = new Box3(
+                new Vec3(this.size.x - filledSpace.x, this.size.y, this.size.z),
+                new Vec3(filledSpace.x, 0, 0)
+            );
+
+            let remainY = new Box3(
+                new Vec3(this.size.x, this.size.y - filledSpace.y, this.size.z),
+                new Vec3(0, filledSpace.y, 0)
+            );
+
+            let remainZ = new Box3(
+                new Vec3(this.size.x, this.size.y, this.size.z - filledSpace.z),
+                new Vec3(0, 0, filledSpace.z)
+            );
+
+            // определяем, в какую из 3х вмещается больше предметов
+            let maxAddCount = 0;
+            let bestAddBox = new Box3();
+            [remainX, remainY, remainZ].forEach(function(addBox) {
+                addBox.fillWithItems(itemSize);
+                if (maxAddCount < addBox.content.length) {
+                    bestAddBox = addBox;
+                    maxAddCount = addBox.content.length;
+                }
+            });
+
+            if (maxAddCount == 0) break; // больше ничего не лезет, выходим
+
+            this.content = this.content.concat(bestAddBox.content);
+            this.descr = this.descr.concat(bestAddBox.descr);
+        }
+    }
+
+    // поиск оптимальной ориентации предмета и заполнение объема
     fillWithItems(itemSize: Vec3) {
-        let bestRotation = Vec3.zero;
+        let bestRotation = new Vec3();
         let maxCount = 0;
-        let bestRows = Vec3.zero;
-        let maxAddCount = 0;
-        let bestAddBox = new Box3(Vec3.zero);
+        let bestRows = new Vec3();
         // определяем, при какой ориентации больше вмещается
         itemSize.rotations.forEach((r) => {
             let rows = new Vec3(
@@ -90,7 +141,6 @@ class Box3 {
 
         if (maxCount == 0) {
             this.descr = []; // предмет больше контейнера
-            // выход из рекурсии при размещении в оставшемся объеме
             return;
         }
 
@@ -100,9 +150,9 @@ class Box3 {
                 for (let rowZ = 0; rowZ < bestRows.z; rowZ++) {
                     let item = new Item3(bestRotation);
                     item.pos = new Vec3(
-                        rowX * bestRotation.x,
-                        rowY * bestRotation.y,
-                        rowZ * bestRotation.z
+                        this.pos.x + rowX * bestRotation.x,
+                        this.pos.y + rowY * bestRotation.y,
+                        this.pos.z + rowZ * bestRotation.z
                     );
                     this.content.push(item);
                 }
@@ -113,48 +163,6 @@ class Box3 {
             rows: bestRows,
             count: this.content.length,
         });
-
-        // размещение в оставшемся свободном объеме
-        // oпределяем оставшиеся области по 3 осям
-        let remainX = new Box3(new Vec3(
-            this.size.x - bestRotation.x * bestRows.x,
-            this.size.y,
-            this.size.z
-        ));
-        remainX.pos = new Vec3(bestRotation.x * bestRows.x, 0, 0);
-
-        let remainY = new Box3(new Vec3(
-            this.size.x,
-            this.size.y - bestRotation.y * bestRows.y,
-            this.size.z
-        ));
-        remainY.pos = new Vec3(0, bestRotation.y * bestRows.y, 0);
-
-        let remainZ = new Box3(new Vec3(
-            this.size.x,
-            this.size.y,
-            this.size.z - bestRotation.z * bestRows.z
-        ));
-        remainZ.pos = new Vec3(0, 0, bestRotation.z * bestRows.z);
-
-        // определяем, в какую из 3х вмещается больше предметов
-        [remainX, remainY, remainZ].forEach(function (addBox) {
-            addBox.fillWithItems(itemSize);
-            if (maxAddCount < addBox.content.length) {
-                bestAddBox = addBox;
-                maxAddCount = addBox.content.length;
-            }
-
-        });
-        // добавляем дополнительно размещенные предметы к основным
-        bestAddBox.content.forEach((addItem) => {
-            addItem.pos = Vec3.add(addItem.pos, bestAddBox.pos)
-            this.content.push(addItem);
-        });
-        if (maxAddCount > 0) {
-            this.descr = this.descr.concat(bestAddBox.descr);
-        }
-
     }
 
     // ------------------------------------------ render
@@ -184,8 +192,15 @@ class Box3 {
             'rgb(250, 250, 220)',
             'rgb(255, 255, 255)'
         ];
-        this.content.forEach(function (item) {
-            item.drawPaths.forEach(function (path, i) {
+
+        this.content.forEach(function(item) {
+            if (item.isFlat()) {
+                // чтобы не было черноты
+                ctx.strokeStyle = 'rgba(0,0,0,0.2)';
+            } else {
+                ctx.strokeStyle = 'black';
+            }
+            item.drawPaths.forEach(function(path, i) {
                 path.closePath();
                 ctx.fillStyle = sideColors[i];
                 ctx.fill(path);
@@ -197,7 +212,7 @@ class Box3 {
         ctx.strokeStyle = 'rgba(0, 0, 0, 0.2)';
 
         let boxItem = new Item3(this.size);
-        boxItem.drawPaths.forEach(function (path) {
+        boxItem.drawPaths.forEach(function(path) {
             path.closePath();
             ctx.stroke(path);
         });

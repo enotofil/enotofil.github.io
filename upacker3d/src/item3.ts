@@ -1,9 +1,11 @@
 // Предмет, имеющий Ш/В/Г и позицию в пространстве
 class Item3 {
-    pos: Vec3;
 
-    constructor(public size: Vec3) {
-        this.pos = Vec3.zero;
+    constructor(public size: Vec3, public pos: Vec3 = new Vec3()) {}
+
+    isFlat(): boolean {
+        if (this.size.x < 2 || this.size.y < 2 || this.size.z < 2) return true;
+        return false;
     }
 
     get drawPaths(): Path2D[] {
@@ -11,8 +13,11 @@ class Item3 {
         let y = this.pos.y;
         let z = this.pos.z;
         let dx = this.size.x;
+        // if (dx < 2) dx = 2;
         let dy = this.size.y;
+        // if (dy < 2) dy = 2;
         let dz = this.size.z;
+        // if (dz < 2) dz = 2;
         let s30 = Math.sin(Math.PI / 6);
         let c30 = Math.cos(Math.PI / 6);
         let x2 = x + dx;
